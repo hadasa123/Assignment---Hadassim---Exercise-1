@@ -12,15 +12,12 @@ namespace Assignment___Hadassim___Exercise_1
         public static IDictionary<string, int> CreatDictionaryNames(string names)
         {
             IDictionary<string, int> numberNames = new Dictionary<string, int>();
-
-            string[] listNames = names.Substring(6, names.Length - 7).Split(',');
+            string[] listNames = names.Substring(6, names.Length - 6).Split(',');
             foreach (var item in listNames)
             {
                 string name = "";
                 name = item.Split('(')[0].Substring(1, item.Split('(')[0].Length - 2);
-                string tmp = item.Substring(item.IndexOf('(') + 1, item.Split('(')[1].Length);
-                if (tmp[tmp.Length - 1] == ')')
-                    tmp = tmp.Substring(0, tmp.Length - 1);
+                string tmp = item.Substring(item.IndexOf('(') + 1, item.Split('(')[1].Length-1);
                 int frequency = Int32.Parse(tmp);
                 numberNames.Add(name, frequency);
             }
@@ -37,10 +34,7 @@ namespace Assignment___Hadassim___Exercise_1
                 List<string> list2 = new List<string>();
                 string symbol1 = listSynonyms[i].Split(',')[0];
                 string symbol2 = "";
-                if (listSynonyms[i].Split(',')[1][0] == ' ')
-                    symbol2 = listSynonyms[i].Split(',')[1].Substring(1, listSynonyms[i].Split(',')[1].Length - 1);
-                else
-                    symbol2 = listSynonyms[i].Split(',')[1];
+                symbol2 = listSynonyms[i].Split(',')[1].Substring(1, listSynonyms[i].Split(',')[1].Length - 1);
                 foreach (var groupOfSynonyms in groupsOfSynonyms)
                 {
                     if (groupOfSynonyms.Contains(symbol1))
@@ -77,21 +71,55 @@ namespace Assignment___Hadassim___Exercise_1
                 }
             }
             return groupsOfSynonyms;
+        }
+        public static string Path()
+        {
+            //C:\Users\User\source\repos\Assignment - Hadassim - Exercise 1\Assignment - Hadassim - Exercise 1\bin\Debug\Assignment - Hadassim - Exercise 1.exe
+            String[] arguments = Environment.GetCommandLineArgs();
+            string s;
+            if (arguments.Length == 1)
+                s = arguments[0];
+            else
+            {
+                s = arguments[1];
+                s = s.Replace("/service:", "");
+            }
+            string[] ss = s.Split('\\');
+            int x = ss.Length - 3;
+            
 
+            Array.Resize(ref ss, x );
+            string str = String.Join("\\", ss);
+            return str;
         }
         static void Main(string[] args)
         {
-            string names = System.IO.File.ReadAllText(@"C:\Users\User\Desktop\Ex 1\Names.txt");
-
-            IDictionary<string, int>  numberNames = CreatDictionaryNames(names);
-
-            string synonyms = System.IO.File.ReadAllText(@"C:\Users\User\Desktop\Ex 1\Synonyms.txt");
+            string names="";
+            string PathOfFileNames = Path()+"\\Names.txt";
+            try
+            {
+                names = System.IO.File.ReadAllText(PathOfFileNames);
+            }
+            catch (FileNotFoundException ex) 
+            {
+                Console.WriteLine("file not found "+ex.FileName);
+            }
+            IDictionary<string, int> numberNames = CreatDictionaryNames(names);
+            string synonyms = "";
+            string PathOfFileSynonyms = Path() + "\\Synonyms.txt";
+            try
+            {
+                synonyms = System.IO.File.ReadAllText(PathOfFileSynonyms);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("file not found" + ex.FileName);
+            }
             List<List<string>> groupsOfSynonyms = CreatListOfSynonyms(synonyms);
             string output = "Output: ";
             foreach (var item in numberNames)
                 if (!synonyms.Contains(item.Key))
                     output += item.Key + " (" + item.Value + "), ";
-
             foreach (var groupOfSynonyms in groupsOfSynonyms)
             {
                 int sumOfBabiesInGroup = 0;
@@ -99,16 +127,26 @@ namespace Assignment___Hadassim___Exercise_1
                 foreach (string s in groupOfSynonyms)
                 {
                     if (numberNames.TryGetValue(s, out var value))
+                    {
                         sumOfBabiesInGroup += value;
-                    representativeName = s;
+                        representativeName = s;
+                    }      
                 }
                 output += representativeName + " (" + sumOfBabiesInGroup + "), ";
             }
             output=output.Substring(0, output.LastIndexOf(','));
             Console.WriteLine(output);
-            File.WriteAllText(@"C:\Users\User\Desktop\Ex 1\Output.txt", output);
+            string PathOfFileOutput = Path() + "\\Output.txt";
+            try
+            {
+                File.WriteAllText(PathOfFileOutput, output);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("Unable to create file" + ex.FileName);
+            }
+            
         }
-       
     }
 }
 
